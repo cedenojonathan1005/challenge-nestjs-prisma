@@ -19,3 +19,24 @@ docker exec api npx prisma db seed
 ```
 http://localhost:3000/doc#/
 ```
+
+## Manual Installing
+Intall dependencies
+```bash
+npm i
+```
+
+Rename file .env.template for .env and set the environment variables
+```
+DATABASE_URL=
+JWT_SECRET=
+JWT_EXPIRES_IN=
+JWT_REFRESH_SECRET=
+JWT_REFRESH_EXPIRES_IN=
+```
+
+Config database
+```bash
+Go to folder prisma and execute npx prisma migrate dev --create-only
+```
+

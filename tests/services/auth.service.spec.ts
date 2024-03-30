@@ -29,6 +29,7 @@ describe('AuthService', () => {
     createdAt: moment().toDate(),
     updatedAt: moment().toDate(),
     status: true,
+    rol: [1],
   };
   const credentials = {
     user: 'test',

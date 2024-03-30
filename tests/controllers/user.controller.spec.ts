@@ -6,6 +6,7 @@ import moment from 'moment-timezone';
 
 import { UserController } from '../../src/controllers/user.controller';
 import { UpdateRequestDto } from '../../src/dtos/update-request.dto';
+import { RolesEnum } from '../../src/enums/roles.emun';
 import {
   LoginResponseInterface,
   RefreshTokenResponse,
@@ -16,7 +17,7 @@ import { PrismaService } from '../../src/services/prisma.service';
 import { RoleService } from '../../src/services/role.service';
 import { UserService } from '../../src/services/user.service';
 
-describe('AppController', () => {
+describe('TaskController', () => {
   const user = {
     id: 1,
     name: 'test',
@@ -40,6 +41,7 @@ describe('AppController', () => {
   const userDto = {
     ...user,
     pass: 'test',
+    rol: RolesEnum.ADMIN,
   };
   let appController: UserController;
   let authService: AuthService;
@@ -97,6 +99,7 @@ describe('AppController', () => {
       const result: UserInterface = await appController.create({
         ...user,
         pass: 'test',
+        rol: RolesEnum.ADMIN,
       });
 
       expect(result).toEqual(user);
@@ -111,9 +114,8 @@ describe('AppController', () => {
 
   describe('login', () => {
     it('should return login', async () => {
-      const result: LoginResponseInterface = await appController.login(
-        credentials,
-      );
+      const result: LoginResponseInterface =
+        await appController.login(credentials);
 
       expect(result).toEqual(login);
     });
@@ -128,9 +130,8 @@ describe('AppController', () => {
 
   describe('refreshToken', () => {
     it('should return refresh token', async () => {
-      const result: RefreshTokenResponse = await appController.refreshToken(
-        req,
-      );
+      const result: RefreshTokenResponse =
+        await appController.refreshToken(req);
 
       expect(result).toEqual(refreshToken);
     });

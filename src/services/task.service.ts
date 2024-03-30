@@ -11,12 +11,14 @@ import { CreateTaskDto } from '../dtos/create-task.dto';
 import { UpdateTaskDto } from '../dtos/update-task.dto';
 import { ExpiredTask } from '../interfaces/expired-task.interface';
 import { PrismaService } from './prisma.service';
+import { AppGateway } from './web-socket.gateway';
 
 @Injectable()
 export class TaskService {
   constructor(
     private readonly _logger: Logger,
     private readonly _prismaService: PrismaService,
+    private readonly _websocketService: AppGateway,
   ) {}
 
   async getTasks(data: Prisma.TaskWhereInput): Promise<Task[]> {
@@ -47,8 +49,12 @@ export class TaskService {
     });
   }
 
-  async updateTask(userId: number, data: UpdateTaskDto): Promise<Task> {
-    const task = await this.findOne({ id: data.id });
+  async updateTask(
+    userId: number,
+    data: UpdateTaskDto,
+    id: number,
+  ): Promise<Task> {
+    const task = await this.findOne({ id });
 
     if (!task) {
       throw new NotFoundException('Task not found');
@@ -59,11 +65,14 @@ export class TaskService {
         'You do not have permission to edit this task.',
       );
     }
-
-    return this._prismaService.task.update({
-      where: { id: data.id },
+    const taskUpdated = await this._prismaService.task.update({
+      where: { id },
       data,
     });
+
+    this._websocketService.handleUpdateTodo(taskUpdated);
+
+    return taskUpdated;
   }
 
   async deleteTask(id: number): Promise<void> {

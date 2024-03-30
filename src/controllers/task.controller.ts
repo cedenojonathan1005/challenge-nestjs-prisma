@@ -47,14 +47,18 @@ export class TaskController {
     return await this._taskService.getTasks({ userId: +userId });
   }
 
-  @Put()
+  @Put(':id')
   @UseGuards(JwtAuthGuard)
   @ApiSecurity('bearer')
   @ApiUnauthorizedResponse()
   @ApiForbiddenResponse()
   @ApiBadRequestResponse()
-  async updateTask(@Req() req, @Body() body: UpdateTaskDto): Promise<Task> {
-    return this._taskService.updateTask(req.user.id, body);
+  async updateTask(
+    @Param('id') id: string,
+    @Req() req,
+    @Body() body: UpdateTaskDto,
+  ): Promise<Task> {
+    return this._taskService.updateTask(req.user.id, body, +id);
   }
 
   @Delete(':id')

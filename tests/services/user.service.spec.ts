@@ -5,6 +5,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '@prisma/client';
 import moment from 'moment-timezone';
 
+import { RolesEnum } from '../../src/enums/roles.emun';
 import { UserInterface } from '../../src/interfaces/user.interface';
 import { AuthService } from '../../src/services/auth.service';
 import { PrismaService } from '../../src/services/prisma.service';
@@ -23,6 +24,7 @@ describe('UserService', () => {
   const userDto = {
     ...user,
     pass: 'test',
+    rol: RolesEnum.ADMIN,
   };
   let service: UserService;
   let authService: AuthService;

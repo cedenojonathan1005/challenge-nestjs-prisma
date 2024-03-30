@@ -11,6 +11,7 @@ import { PrismaService } from './services/prisma.service';
 import { RoleService } from './services/role.service';
 import { TaskService } from './services/task.service';
 import { UserService } from './services/user.service';
+import { AppGateway } from './services/web-socket.gateway';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 
@@ -34,6 +35,7 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
     RoleService,
     UserService,
     TaskService,
+    AppGateway,
   ],
 })
 export class AppModule implements NestModule {

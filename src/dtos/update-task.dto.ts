@@ -1,13 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { TaskStatusEnum } from '@prisma/client';
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 export class UpdateTaskDto {
-  @ApiProperty()
-  @IsNumber()
-  @IsNotEmpty()
-  readonly id: number;
-
   @ApiProperty()
   @IsString()
   @IsNotEmpty()

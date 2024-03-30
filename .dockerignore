@@ -1,0 +1,9 @@
+prisma/migrations
+dist
+coverage
+node_modules
+tests/
+.idea
+.env
+docker-compose.yml
+Dockerfile

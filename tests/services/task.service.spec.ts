@@ -26,7 +26,6 @@ describe('TaskService', () => {
   };
 
   const taskUpdateRequest = {
-    id: 7,
     name: 'Task Test 7',
     status: TaskStatusEnum.COMPLETE,
     description: 'Task description test for BD 6',
@@ -115,7 +114,7 @@ describe('TaskService', () => {
 
   describe('updateTask', () => {
     it('should update a task', async () => {
-      const task = await service.updateTask(1, taskUpdateRequest);
+      const task = await service.updateTask(1, taskUpdateRequest, 7);
 
       expect(prismaService.task.update).toHaveBeenCalledTimes(1);
       expect(prismaService.task.update).toHaveBeenCalledWith({
@@ -128,7 +127,7 @@ describe('TaskService', () => {
     it('should throw an error if the task does not exist', async () => {
       prismaService.task.findFirst = jest.fn().mockResolvedValue(null);
       try {
-        await service.updateTask(1, taskUpdateRequest);
+        await service.updateTask(1, taskUpdateRequest, 7);
       } catch (err) {
         expect(err.message).toBe('Task not found');
       }
@@ -137,7 +136,7 @@ describe('TaskService', () => {
     it('should throw an error if the user does not have permission', async () => {
       prismaService.task.findFirst = jest.fn().mockResolvedValue(taskResponse);
       try {
-        await service.updateTask(2, taskUpdateRequest);
+        await service.updateTask(2, taskUpdateRequest, 7);
       } catch (err) {
         expect(err.message).toBe(
           'You do not have permission to edit this task.',
@@ -148,11 +147,11 @@ describe('TaskService', () => {
 
   describe('deleteTask', () => {
     it('should delete a task', async () => {
-      await service.deleteTask(7);
+      await service.deleteTask(7, 1);
 
       expect(prismaService.task.delete).toHaveBeenCalledTimes(1);
       expect(prismaService.task.delete).toHaveBeenCalledWith({
-        where: { id: 7 },
+        where: { id: 7, userId: 1 },
       });
     });
 
@@ -162,10 +161,13 @@ describe('TaskService', () => {
         .mockRejectedValue({ meta: { cause: 'error' } });
       const loggerSpy = jest.spyOn(Logger.prototype, 'log');
 
-      await service.deleteTask(7);
-
-      expect(loggerSpy).toHaveBeenCalledTimes(1);
-      expect(loggerSpy).toHaveBeenCalledWith('7: error');
+      try {
+        await service.deleteTask(7, 1);
+      } catch (err) {
+        expect(loggerSpy).toHaveBeenCalledTimes(1);
+        expect(loggerSpy).toHaveBeenCalledWith('7: error');
+        expect(err.message).toBe('Task not found');
+      }
     });
   });
 

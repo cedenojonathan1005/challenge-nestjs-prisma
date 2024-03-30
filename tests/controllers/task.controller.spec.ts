@@ -6,6 +6,7 @@ import { TaskController } from '../../src/controllers/task.controller';
 import { ExpiredTask } from '../../src/interfaces/expired-task.interface';
 import { PrismaService } from '../../src/services/prisma.service';
 import { TaskService } from '../../src/services/task.service';
+import { AppGateway } from '../../src/services/web-socket.gateway';
 
 describe('TaskController', () => {
   const taskRequest = {
@@ -25,7 +26,6 @@ describe('TaskController', () => {
     description: 'Task description test for BD 6',
   };
   const taskUpdateRequest = {
-    id: 7,
     name: 'Task Test 7',
     status: TaskStatusEnum.COMPLETE,
     description: 'Task description test for BD 6',
@@ -51,16 +51,29 @@ describe('TaskController', () => {
 
   let taskController: TaskController;
   let taskService: TaskService;
+  let appGateway: AppGateway;
 
   beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [TaskController],
-      providers: [TaskService, Logger, PrismaService],
+      providers: [
+        TaskService,
+        Logger,
+        PrismaService,
+        {
+          provide: AppGateway,
+          useValue: {
+            server: {
+              emit: jest.fn(),
+            },
+          },
+        },
+      ],
     }).compile();
 
     taskController = app.get<TaskController>(TaskController);
-
     taskService = app.get<TaskService>(TaskService);
+    appGateway = app.get<AppGateway>(AppGateway);
   });
 
   beforeEach(() => {
@@ -69,6 +82,10 @@ describe('TaskController', () => {
     taskService.updateTask = jest.fn().mockResolvedValue(taskResponse);
     taskService.deleteTask = jest.fn();
     taskService.findExpiredTasks = jest.fn().mockResolvedValue([expiredTask]);
+  });
+
+  it('should be defined', () => {
+    expect(taskController).toBeDefined();
   });
 
   describe('createTask', () => {
@@ -93,20 +110,33 @@ describe('TaskController', () => {
 
   describe('updateTask', () => {
     it('should return a task', async () => {
-      const result = await taskController.updateTask(req, taskUpdateRequest);
+      const result = await taskController.updateTask(
+        '7',
+        req,
+        taskUpdateRequest,
+      );
 
       expect(taskService.updateTask).toHaveBeenCalledTimes(1);
-      expect(taskService.updateTask).toHaveBeenCalledWith(1, taskUpdateRequest);
+      expect(taskService.updateTask).toHaveBeenCalledWith(
+        1,
+        taskUpdateRequest,
+        7,
+      );
+      expect(appGateway.server.emit).toHaveBeenCalledTimes(1);
+      expect(appGateway.server.emit).toHaveBeenCalledWith(
+        'todoUpdated',
+        taskResponse,
+      );
       expect(result).toEqual(taskResponse);
     });
   });
 
   describe('delete', () => {
     it('should delete a task', async () => {
-      await taskController.delete('7');
+      await taskController.delete(req, '7');
 
       expect(taskService.deleteTask).toHaveBeenCalledTimes(1);
-      expect(taskService.deleteTask).toHaveBeenCalledWith(7);
+      expect(taskService.deleteTask).toHaveBeenCalledWith(7, 1);
     });
   });
 

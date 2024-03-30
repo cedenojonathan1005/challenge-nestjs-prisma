@@ -40,3 +40,7 @@ Config database
 Go to folder prisma and execute npx prisma migrate dev --create-only
 ```
 
+Run the project
+```bash
+npm run start:dev
+```
